@@ -25,10 +25,16 @@ app
       res.status(400);
       res.send("Invalid input!");
     } else {
-      const item = new Item({ name: itemName });
       try {
-        await item.save();
-        res.send(`Successfully saved item: ${item}`);
+        const existingItem = await Item.findOne({ name: itemName });
+        if (existingItem) {
+          res.status(400);
+          res.send("Item already exists!");
+        } else {
+          const item = new Item({ name: itemName });
+          await item.save();
+          res.send(item);
+        }
       } catch (error) {
         res.status(500);
         res.send("Save failed! Please try again!");
@@ -43,7 +49,7 @@ app
     } else {
       try {
         await Item.deleteOne({ name: itemName });
-        res.send(`Successfully deleted item: ${itemName}`);
+        res.send(itemName);
       } catch (error) {
         res.status(500);
         res.send("Delete failed! Please try again!");
